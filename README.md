@@ -750,6 +750,107 @@ void Login::createFormGroupBox() {
 
 `Login` 类通过继承 `QDialog` 实现了一个简单的登录界面，包括输入用户名、密码、登录和注册功能。界面使用了多个 `QGroupBox` 和布局管理器来组织和显示控件。用户可以输入用户名和密码进行登录，或者点击注册按钮进行新用户注册，注册成功后显示成功提示信息。
 
+### 类：`Register`
+`Register` 类是一个基于 Qt 框架的注册界面，用于用户注册流程的实现。它提供了一个简单的界面，允许用户在用户不存在时选择是否进行注册。
+
+#### 头文件：`register.h`
+``` cpp
+#ifndef REGISTER_H
+#define REGISTER_H
+
+#include <QWidget>
+#include <QDialog>
+#include <QPushButton>
+#include <QtWidgets>
+
+class Register : public QDialog
+{
+    Q_OBJECT
+
+public:
+    explicit Register(QWidget *parent = nullptr); // 构造函数，创建注册界面
+
+private slots:
+    void ifAccepted(); // 接受注册的槽函数
+    void ifRejected(); // 拒绝注册的槽函数
+
+signals:
+    void do_register(bool &flag); // 发出一个注册状态的信号
+
+private:
+    QTextEdit *bigEditor; // 用于显示注册信息的文本编辑框
+    QDialogButtonBox *buttonBox; // 按钮框，包含接受和拒绝按钮
+    bool flag; // 用于存储用户是否选择注册的标志
+};
+
+#endif // REGISTER_H
+```
+
+#### 实现文件：`register.cpp`
+
+```cpp
+#include <QDialog>
+#include <QTextEdit>
+#include <QDialogButtonBox>
+#include <QPushButton>
+#include "register.h"
+
+// 构造函数，初始化注册界面
+Register::Register(QWidget *parent) : QDialog(parent), flag(false)
+{
+    // 创建表单布局
+    QFormLayout *layout = new QFormLayout;
+
+    // 初始化文本编辑框，显示注册信息
+    bigEditor = new QTextEdit;
+    bigEditor->setPlainText(tr("User does not exist. Do you want to register?"));
+
+    // 创建按钮框，包含"是"和"否"两个按钮
+    buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    connect(buttonBox, &QDialogButtonBox::accepted, this, &Register::ifAccepted);
+    connect(buttonBox, &QDialogButtonBox::rejected, this, &Register::ifRejected);
+
+    // 设置按钮文本
+    QPushButton *okButton = buttonBox->button(QDialogButtonBox::Ok);
+    if (okButton) {
+        okButton->setText(tr("Yes"));
+    }
+    QPushButton *noButton = buttonBox->button(QDialogButtonBox::Cancel);
+    if (noButton) {
+        noButton->setText(tr("No"));
+    }
+
+    // 将组件添加到布局中
+    layout->addRow(bigEditor);
+    layout->addWidget(buttonBox);
+
+    // 设置窗口标题和固定大小
+    setWindowTitle(tr("Time Management Program"));
+    setFixedSize(300, 100);
+
+    // 设置布局
+    setLayout(layout);
+}
+
+// 槽函数，当用户选择注册时调用
+void Register::ifAccepted()
+{
+    flag = true; // 设置标志为真，表示用户选择注册
+    emit do_register(flag); // 发出注册状态信号
+    close(); // 关闭注册对话框
+}
+
+// 槽函数，当用户选择不注册时调用
+void Register::ifRejected()
+{
+    flag = false; // 设置标志为假，表示用户选择不注册
+    emit do_register(flag); // 发出注册状态信号
+    close(); // 关闭注册对话框
+}
+```
+类功能
+Register 类实现了一个简单的注册对话框，提供了用户选择是否注册的选项。当用户选择注册时，它会发出一个信号，通知其他组件用户的选择。这个类通过继承 QDialog 来实现，使用了 QTextEdit 来显示注册信息，以及 QDialogButtonBox 来提供用户交互的按钮。通过 ifAccepted 和 ifRejected 槽函数来处理用户的响应，并设置内部标志位 flag 来表示用户的决定。
+
 ---
 
 ## 接口设计
